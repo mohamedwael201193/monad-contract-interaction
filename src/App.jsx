@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useAccount, useConnect, useDisconnect, useWalletClient, usePublicClient } from 'wagmi'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { Contract } from 'ethers'
@@ -52,6 +52,9 @@ function App() {
   const [completedContracts, setCompletedContracts] = useState(0)
   const [failedContracts, setFailedContracts] = useState(0)
   const [interactions, setInteractions] = useState([])
+  
+  // Use ref to track if interaction should continue
+  const shouldContinueRef = useRef(false)
 
   // Add interaction result to the list
   const addInteractionResult = useCallback((contractIndex, address, status, error = null) => {
@@ -123,12 +126,12 @@ function App() {
     if (chain?.id !== 10143) {
       console.error('startInteraction: Connected to wrong network. Expected Monad Testnet (Chain ID 10143), but got:', chain?.id)
       addInteractionResult(0, 'N/A', 'failed', `Wrong network. Please switch to Monad Testnet (Chain ID 10143). Current: ${chain?.name || 'Unknown'}`)
-      setIsInteracting(false)
       return
     }
 
     try {
       setIsInteracting(true)
+      shouldContinueRef.current = true
       setCurrentContract(0)
       setCompletedContracts(0)
       setFailedContracts(0)
@@ -137,7 +140,7 @@ function App() {
 
       // Interact with each contract sequentially
       for (let i = 0; i < CONTRACT_ADDRESSES.length; i++) {
-        if (!isInteracting) {
+        if (!shouldContinueRef.current) {
           console.log('Interaction stopped by user.')
           break // Allow stopping
         }
@@ -148,7 +151,7 @@ function App() {
         console.log(`Interaction with contract ${i + 1} was: ${success ? 'Successful' : 'Failed'}`)
         
         // Add delay to avoid rate limits (1 second between interactions)
-        if (i < CONTRACT_ADDRESSES.length - 1) {
+        if (i < CONTRACT_ADDRESSES.length - 1 && shouldContinueRef.current) {
           await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
@@ -158,12 +161,15 @@ function App() {
       addInteractionResult(0, 'N/A', 'failed', `Interaction failed: ${error.message}`)
     } finally {
       setIsInteracting(false)
+      shouldContinueRef.current = false
       setCurrentContract(0)
     }
-  }, [isConnected, open, interactWithContract, addInteractionResult, isInteracting, chain])
+  }, [isConnected, open, interactWithContract, addInteractionResult, chain])
 
   // Stop interaction
   const stopInteraction = useCallback(() => {
+    console.log('Stop interaction requested by user')
+    shouldContinueRef.current = false
     setIsInteracting(false)
   }, [])
 
@@ -332,5 +338,4 @@ function App() {
 }
 
 export default App
-
 
