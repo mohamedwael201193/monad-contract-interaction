@@ -12,7 +12,7 @@ const projectId = 'e3b01d837d72bbda3bdc06a8204389be' // You'll need to get this 
 
 // 2. Define Monad Testnet chain
 const monadTestnet = {
-  id: 41454, // Replace with actual Monad Testnet chain ID
+  id: 10143, // Correct Monad Testnet chain ID
   name: 'Monad Testnet',
   network: 'monad-testnet',
   nativeCurrency: {
