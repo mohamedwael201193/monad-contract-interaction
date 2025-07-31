@@ -68,21 +68,33 @@ function App() {
   // Interact with a single contract
   const interactWithContract = useCallback(async (contractAddress, contractIndex) => {
     try {
-      if (!walletClient || !publicClient) {
-        throw new Error('Wallet not connected')
+      console.log(`Attempting to interact with contract ${contractIndex + 1}: ${contractAddress}`)
+      if (!walletClient) {
+        console.error('interactWithContract: walletClient is null or undefined')
+        throw new Error('Wallet client not available')
+      }
+      if (!publicClient) {
+        console.error('interactWithContract: publicClient is null or undefined')
+        throw new Error('Public client not available')
       }
 
       // Create ethers provider from wagmi clients
       const provider = new BrowserProvider(walletClient)
       const signer = await provider.getSigner()
+      console.log('Signer obtained:', signer.address)
       
       const contract = new Contract(contractAddress, CONTRACT_ABI, signer)
+      console.log('Contract instance created:', contract)
       
       // Call the interact() method
+      console.log('Calling interact() method...')
       const tx = await contract.interact()
+      console.log('Transaction sent:', tx.hash)
       
       // Wait for transaction confirmation
+      console.log('Waiting for transaction confirmation...')
       const receipt = await tx.wait()
+      console.log('Transaction receipt:', receipt)
       
       if (receipt.status === 1) {
         addInteractionResult(contractIndex, contractAddress, 'success')
@@ -108,26 +120,39 @@ function App() {
       return
     }
 
+    if (chain?.id !== 10143) {
+      console.error('startInteraction: Connected to wrong network. Expected Monad Testnet (Chain ID 10143), but got:', chain?.id)
+      addInteractionResult(0, 'N/A', 'failed', `Wrong network. Please switch to Monad Testnet (Chain ID 10143). Current: ${chain?.name || 'Unknown'}`)
+      setIsInteracting(false)
+      return
+    }
+
     try {
       setIsInteracting(true)
       setCurrentContract(0)
       setCompletedContracts(0)
       setFailedContracts(0)
       setInteractions([])
+      console.log('Starting interaction process...')
 
       // Interact with each contract sequentially
       for (let i = 0; i < CONTRACT_ADDRESSES.length; i++) {
-        if (!isInteracting) break // Allow stopping
+        if (!isInteracting) {
+          console.log('Interaction stopped by user.')
+          break // Allow stopping
+        }
 
         setCurrentContract(i + 1)
         
-        await interactWithContract(CONTRACT_ADDRESSES[i], i)
+        const success = await interactWithContract(CONTRACT_ADDRESSES[i], i)
+        console.log(`Interaction with contract ${i + 1} was: ${success ? 'Successful' : 'Failed'}`)
         
         // Add delay to avoid rate limits (1 second between interactions)
         if (i < CONTRACT_ADDRESSES.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 1000))
         }
       }
+      console.log('Interaction process completed.')
     } catch (error) {
       console.error('Failed to start interactions:', error)
       addInteractionResult(0, 'N/A', 'failed', `Interaction failed: ${error.message}`)
@@ -135,7 +160,7 @@ function App() {
       setIsInteracting(false)
       setCurrentContract(0)
     }
-  }, [isConnected, open, interactWithContract, addInteractionResult, isInteracting])
+  }, [isConnected, open, interactWithContract, addInteractionResult, isInteracting, chain])
 
   // Stop interaction
   const stopInteraction = useCallback(() => {
@@ -307,4 +332,5 @@ function App() {
 }
 
 export default App
+
 
