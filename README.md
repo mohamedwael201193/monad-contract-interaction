@@ -1,114 +1,114 @@
 # Monad Testnet Smart Contract Interaction
 
-تطبيق ويب احترافي مبني بـ React + Vite + Tailwind CSS للتفاعل مع العقود الذكية على شبكة Monad Testnet.
+A professional web application built with React + Vite + Tailwind CSS for interacting with smart contracts on the Monad Testnet.
 
-## المميزات
+## Features
 
-- **واجهة مستخدم نظيفة ومتجاوبة**: تصميم minimal وحديث باستخدام Tailwind CSS و shadcn/ui
-- **التفاعل مع 100 عقد ذكي**: إمكانية التفاعل التسلسلي مع قائمة من العقود الذكية
-- **ردود فعل فورية**: عرض حالة كل معاملة في الوقت الفعلي
-- **معالجة الأخطاء**: نظام شامل لمعالجة الأخطاء وعرض الرسائل
-- **مؤشرات التحميل**: مؤشرات بصرية لحالة التقدم والتحميل
-- **إحصائيات شاملة**: عرض عدد المعاملات الناجحة والفاشلة
+- **Clean and Responsive UI**: Minimal and modern design using Tailwind CSS and shadcn/ui
+- **100 Smart Contract Interactions**: Ability to sequentially interact with a list of smart contracts
+- **Real-time Feedback**: Display the status of each transaction in real-time
+- **Error Handling**: Comprehensive error handling system with message display
+- **Loading Indicators**: Visual indicators for progress and loading status
+- **Comprehensive Statistics**: Display the number of successful and failed transactions
 
-## التقنيات المستخدمة
+## Technologies Used
 
-- **React 19**: مكتبة JavaScript لبناء واجهات المستخدم
-- **Vite**: أداة بناء سريعة ومطور محلي
-- **Tailwind CSS**: إطار عمل CSS للتصميم السريع
-- **shadcn/ui**: مكونات UI جاهزة وقابلة للتخصيص
-- **Ethers.js**: مكتبة للتفاعل مع blockchain
-- **Lucide React**: مجموعة أيقونات حديثة
+- **React 19**: JavaScript library for building user interfaces
+- **Vite**: Fast build tool and local development server
+- **Tailwind CSS**: Utility-first CSS framework for rapid styling
+- **shadcn/ui**: Ready-to-use and customizable UI components
+- **Ethers.js**: Library for interacting with the blockchain
+- **Lucide React**: A collection of modern icons
 
-## التثبيت والتشغيل
+## Installation and Running
 
-### المتطلبات
-- Node.js (الإصدار 18 أو أحدث)
-- pnpm (مدير الحزم)
+### Prerequisites
+- Node.js (version 18 or later)
+- pnpm (package manager)
 
-### خطوات التثبيت
+### Installation Steps
 
-1. **استنساخ المستودع**
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd monad-contract-interaction
    ```
 
-2. **تثبيت التبعيات**
+2. **Install dependencies**
    ```bash
    pnpm install
    ```
 
-3. **تشغيل الخادم المحلي**
+3. **Start the local server**
    ```bash
    pnpm run dev
    ```
 
-4. **فتح التطبيق**
-   افتح المتصفح وانتقل إلى `http://localhost:5173`
+4. **Open the application**
+   Open your browser and navigate to `http://localhost:5173`
 
-### البناء للإنتاج
+### Build for Production
 
 ```bash
 pnpm run build
 ```
 
-سيتم إنشاء ملفات الإنتاج في مجلد `dist/`.
+Production files will be generated in the `dist/` folder.
 
-## كيفية الاستخدام
+## How to Use
 
-1. **الاتصال بالشبكة**: سيحاول التطبيق الاتصال بـ MetaMask أو استخدام مزود JSON-RPC
-2. **بدء التفاعل**: اضغط على زر "Start Interaction with 100 Different Contracts"
-3. **مراقبة التقدم**: شاهد التقدم في الوقت الفعلي مع الإحصائيات والنتائج
-4. **إيقاف العملية**: يمكن إيقاف العملية في أي وقت بالضغط على زر الإيقاف
+1. **Connect to Network**: The application will attempt to connect to MetaMask or use a JSON-RPC provider.
+2. **Start Interaction**: Click the "Start Interaction with 100 Different Contracts" button.
+3. **Monitor Progress**: Observe real-time progress with statistics and results.
+4. **Stop Process**: The process can be stopped at any time by clicking the stop button.
 
-## إعداد Monad Testnet
+## Monad Testnet Setup
 
-لاستخدام التطبيق مع شبكة Monad Testnet الفعلية:
+To use the application with the actual Monad Testnet:
 
-1. **إضافة الشبكة إلى MetaMask**:
+1. **Add Network to MetaMask**:
    - Network Name: Monad Testnet
-   - RPC URL: `https://testnet-rpc.monad.xyz` (استبدل بالـ RPC الصحيح)
-   - Chain ID: (أدخل Chain ID الصحيح)
+   - RPC URL: `https://testnet-rpc.monad.xyz` (replace with the correct RPC)
+   - Chain ID: (Enter the correct Chain ID)
    - Currency Symbol: MON
 
-2. **الحصول على عملات اختبار**: استخدم faucet الخاص بـ Monad Testnet
+2. **Get Test Tokens**: Use the Monad Testnet faucet.
 
-3. **تحديث عناوين العقود**: قم بتحديث قائمة `CONTRACT_ADDRESSES` في `src/App.jsx` بعناوين العقود الفعلية
+3. **Update Contract Addresses**: Update the `CONTRACT_ADDRESSES` list in `src/App.jsx` with actual contract addresses.
 
-## هيكل المشروع
+## Project Structure
 
 ```
 monad-contract-interaction/
-├── public/                 # الملفات العامة
+├── public/                 # Public files
 ├── src/
-│   ├── components/         # مكونات React
-│   │   └── ui/            # مكونات UI من shadcn
-│   ├── assets/            # الأصول الثابتة
-│   ├── App.jsx            # المكون الرئيسي
-│   ├── App.css            # أنماط التطبيق
-│   ├── main.jsx           # نقطة الدخول
-│   └── index.css          # الأنماط العامة
-├── index.html             # ملف HTML الرئيسي
-├── package.json           # تبعيات المشروع
-├── vite.config.js         # إعدادات Vite
-└── tailwind.config.js     # إعدادات Tailwind CSS
+│   ├── components/         # React components
+│   │   └── ui/            # shadcn UI components
+│   ├── assets/            # Static assets
+│   ├── App.jsx            # Main component
+│   ├── App.css            # Application styles
+│   ├── main.jsx           # Entry point
+│   └── index.css          # Global styles
+├── index.html             # Main HTML file
+├── package.json           # Project dependencies
+├── vite.config.js         # Vite configuration
+└── tailwind.config.js     # Tailwind CSS configuration
 ```
 
-## المساهمة
+## Contributing
 
-نرحب بالمساهمات! يرجى:
+Contributions are welcome! Please:
 
-1. عمل Fork للمستودع
-2. إنشاء branch جديد للميزة أو الإصلاح
-3. عمل commit للتغييرات
-4. إرسال Pull Request
+1. Fork the repository
+2. Create a new branch for your feature or fix
+3. Commit your changes
+4. Submit a Pull Request
 
-## الترخيص
+## License
 
-هذا المشروع مرخص تحت رخصة MIT.
+This project is licensed under the MIT License.
 
-## الدعم
+## Support
 
-إذا واجهت أي مشاكل أو لديك أسئلة، يرجى فتح issue في المستودع.
+If you encounter any issues or have questions, please open an issue in the repository.
 
