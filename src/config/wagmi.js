@@ -38,7 +38,7 @@ const metadata = {
 }
 
 // 4. Create Wagmi config
-const chains = [monadTestnet, mainnet, arbitrum, polygon, sepolia, bsc, avalanche]
+const chains = [monadTestnet]
 const config = defaultWagmiConfig({
   chains,
   projectId,
