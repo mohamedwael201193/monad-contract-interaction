@@ -38,6 +38,9 @@
     "@radix-ui/react-toggle-group": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.6",
     "@tailwindcss/vite": "^4.1.7",
+    "@tanstack/react-query": "^5.84.0",
+    "@walletconnect/modal": "^2.7.0",
+    "@web3modal/wagmi": "^5.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -59,6 +62,8 @@
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.7",
     "vaul": "^1.1.2",
+    "viem": "^2.33.2",
+    "wagmi": "^2.16.1",
     "zod": "^3.24.4"
   },
   "devDependencies": {

@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react'
-import { ethers } from 'ethers'
+import { useState, useCallback, useEffect } from 'react'
+import { useAccount, useConnect, useDisconnect, useWalletClient, usePublicClient } from 'wagmi'
+import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { Contract } from 'ethers'
+import { BrowserProvider } from 'ethers'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Progress } from '@/components/ui/progress.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, AlertCircle, Wallet, WifiOff } from 'lucide-react'
 import './App.css'
 
 // Sample contract addresses for Monad Testnet (100 contracts)
@@ -37,40 +40,18 @@ const CONTRACT_ABI = [
   }
 ]
 
-// Monad Testnet RPC URL (placeholder - replace with actual RPC)
-const MONAD_TESTNET_RPC = 'https://testnet-rpc.monad.xyz'
-
 function App() {
+  const { address, isConnected, chain } = useAccount()
+  const { open } = useWeb3Modal()
+  const { disconnect } = useDisconnect()
+  const { data: walletClient } = useWalletClient()
+  const publicClient = usePublicClient()
+
   const [isInteracting, setIsInteracting] = useState(false)
   const [currentContract, setCurrentContract] = useState(0)
   const [completedContracts, setCompletedContracts] = useState(0)
   const [failedContracts, setFailedContracts] = useState(0)
   const [interactions, setInteractions] = useState([])
-  const [provider, setProvider] = useState(null)
-  const [signer, setSigner] = useState(null)
-
-  // Initialize provider and signer
-  const initializeProvider = useCallback(async () => {
-    try {
-      // Check if MetaMask is available
-      if (typeof window.ethereum !== 'undefined') {
-        const provider = new ethers.BrowserProvider(window.ethereum)
-        await provider.send('eth_requestAccounts', [])
-        const signer = await provider.getSigner()
-        setProvider(provider)
-        setSigner(signer)
-        return { provider, signer }
-      } else {
-        // Fallback to JSON-RPC provider
-        const provider = new ethers.JsonRpcProvider(MONAD_TESTNET_RPC)
-        setProvider(provider)
-        return { provider, signer: null }
-      }
-    } catch (error) {
-      console.error('Failed to initialize provider:', error)
-      throw error
-    }
-  }, [])
 
   // Add interaction result to the list
   const addInteractionResult = useCallback((contractIndex, address, status, error = null) => {
@@ -85,9 +66,17 @@ function App() {
   }, [])
 
   // Interact with a single contract
-  const interactWithContract = useCallback(async (contractAddress, contractIndex, provider, signer) => {
+  const interactWithContract = useCallback(async (contractAddress, contractIndex) => {
     try {
-      const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer || provider)
+      if (!walletClient || !publicClient) {
+        throw new Error('Wallet not connected')
+      }
+
+      // Create ethers provider from wagmi clients
+      const provider = new BrowserProvider(walletClient)
+      const signer = await provider.getSigner()
+      
+      const contract = new Contract(contractAddress, CONTRACT_ABI, signer)
       
       // Call the interact() method
       const tx = await contract.interact()
@@ -110,10 +99,15 @@ function App() {
       setFailedContracts(prev => prev + 1)
       return false
     }
-  }, [addInteractionResult])
+  }, [walletClient, publicClient, addInteractionResult])
 
   // Start interaction with all contracts
   const startInteraction = useCallback(async () => {
+    if (!isConnected) {
+      open()
+      return
+    }
+
     try {
       setIsInteracting(true)
       setCurrentContract(0)
@@ -121,16 +115,13 @@ function App() {
       setFailedContracts(0)
       setInteractions([])
 
-      // Initialize provider
-      const { provider, signer } = await initializeProvider()
-
       // Interact with each contract sequentially
       for (let i = 0; i < CONTRACT_ADDRESSES.length; i++) {
         if (!isInteracting) break // Allow stopping
 
         setCurrentContract(i + 1)
         
-        await interactWithContract(CONTRACT_ADDRESSES[i], i, provider, signer)
+        await interactWithContract(CONTRACT_ADDRESSES[i], i)
         
         // Add delay to avoid rate limits (1 second between interactions)
         if (i < CONTRACT_ADDRESSES.length - 1) {
@@ -139,12 +130,12 @@ function App() {
       }
     } catch (error) {
       console.error('Failed to start interactions:', error)
-      addInteractionResult(0, 'N/A', 'failed', `Initialization failed: ${error.message}`)
+      addInteractionResult(0, 'N/A', 'failed', `Interaction failed: ${error.message}`)
     } finally {
       setIsInteracting(false)
       setCurrentContract(0)
     }
-  }, [initializeProvider, interactWithContract, addInteractionResult, isInteracting])
+  }, [isConnected, open, interactWithContract, addInteractionResult, isInteracting])
 
   // Stop interaction
   const stopInteraction = useCallback(() => {
@@ -166,6 +157,41 @@ function App() {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* Wallet Connection Section */}
+          <div className="flex justify-center space-x-4">
+            {!isConnected ? (
+              <Button 
+                onClick={() => open()}
+                size="lg"
+                className="px-6 py-3 text-lg font-semibold"
+                variant="outline"
+              >
+                <Wallet className="mr-2 h-5 w-5" />
+                Connect Wallet
+              </Button>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-700">Connected</div>
+                  <div className="text-xs text-gray-500 truncate max-w-32">
+                    {address}
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    {chain?.name || 'Unknown Network'}
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => disconnect()}
+                  size="sm"
+                  variant="outline"
+                >
+                  <WifiOff className="mr-2 h-4 w-4" />
+                  Disconnect
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* Main Action Button */}
           <div className="flex justify-center">
             {!isInteracting ? (
@@ -173,8 +199,16 @@ function App() {
                 onClick={startInteraction}
                 size="lg"
                 className="px-8 py-4 text-lg font-semibold"
+                disabled={!isConnected}
               >
-                Start Interaction with 100 Different Contracts
+                {!isConnected ? (
+                  <>
+                    <Wallet className="mr-2 h-5 w-5" />
+                    Connect Wallet to Start
+                  </>
+                ) : (
+                  'Start Interaction with 100 Different Contracts'
+                )}
               </Button>
             ) : (
               <Button 
@@ -259,7 +293,10 @@ function App() {
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
               <AlertCircle className="h-4 w-4" />
               <span>
-                {provider ? 'Connected to Monad Testnet' : 'Not connected'}
+                {isConnected 
+                  ? `Connected to ${chain?.name || 'Unknown Network'}` 
+                  : 'Please connect your wallet to continue'
+                }
               </span>
             </div>
           </div>
